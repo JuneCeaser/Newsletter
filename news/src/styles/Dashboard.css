@@ -1,0 +1,156 @@
+/* Dashboard.css */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+  
+  .container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    background-color: #d5e5ff;
+    padding: 1rem;
+  }
+  
+  .card {
+    background-color: white;
+    padding: 1.5rem;
+    border-radius: 0.75rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 28rem;
+  }
+  
+  .title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1f2937;
+    margin-bottom: 1rem;
+  }
+  
+  .user {
+    color: #6b7280;
+    font-size: 0.875rem;
+    margin-bottom: 1rem;
+  }
+  
+  /* Navigation Buttons */
+  .nav-buttons {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .nav-button {
+    padding: 0.75rem;
+    background-color: #f3f4f6;
+    border: none;
+    border-radius: 0.375rem;
+    font-size: 0.875rem;
+    color: #4b5563;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  
+  .nav-button:hover {
+    background-color: #e5e7eb;
+    color: #1f2937;
+  }
+  
+  .nav-button:active {
+    background-color: #d1d5db;
+  }
+  
+  .input,
+  .textarea {
+    width: 100%;
+    padding: 0.75rem;
+    margin-bottom: 1rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.375rem;
+    font-size: 0.875rem;
+  }
+  
+  .input:focus,
+  .textarea:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+  }
+  
+  .textarea {
+    min-height: 100px;
+    resize: vertical;
+    font-family: inherit;
+  }
+  
+  .imageUpload {
+    width: 100%;
+    height: 150px;
+    border: 2px dashed #e5e7eb;
+    border-radius: 0.375rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #6b7280;
+    margin-bottom: 1rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  
+  .imageUpload:hover {
+    border-color: #3b82f6;
+    color: #3b82f6;
+  }
+  
+  .sendButton,
+  .logoutButton {
+    width: 100%;
+    padding: 0.75rem;
+    border: none;
+    border-radius: 0.375rem;
+    font-weight: 600;
+    color: white;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+  }
+  
+  .sendButton {
+    background-color: #3b82f6;
+    margin-bottom: 0.75rem;
+  }
+  
+  .sendButton:hover {
+    background-color: #2563eb;
+  }
+  
+  .logoutButton {
+    background-color: #ef4444;
+  }
+  
+  .logoutButton:hover {
+    background-color: #dc2626;
+  }
+  
+  /* Responsive styles */
+  @media (max-width: 640px) {
+    .card {
+      margin: 1rem;
+    }
+    
+    .nav-buttons {
+      grid-template-columns: 1fr;
+    }
+    
+    .input,
+    .textarea,
+    .imageUpload,
+    .sendButton,
+    .logoutButton,
+    .nav-button {
+      font-size: 16px;
+    }
+  }
