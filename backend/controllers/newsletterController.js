@@ -1,10 +1,17 @@
 const Newsletter = require("../models/Newsletter");
-const mongoose = require("mongoose");
+const cloudinary = require("../config/cloudinary");
 
 const createNewsletter = async (req, res) => {
   try {
     const { id, subject, description } = req.body;
-    const imageUrl = req.file ? `/uploads/${req.file.filename}` : "";
+
+    let imageUrl = "";
+    if (req.file) {
+      const result = await cloudinary.uploader.upload(req.file.path, {
+        folder: "newsletters",
+      });
+      imageUrl = result.secure_url;
+    }
 
     const newNewsletter = new Newsletter({
       _id: id,

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { auth } from "../firebaseConfig";
 import { signOut, onAuthStateChanged } from "firebase/auth";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
 import { v4 as uuidv4 } from "uuid";
 import "../styles/Dashboard.css";
@@ -11,7 +11,11 @@ const Dashboard = () => {
   const [subject, setSubject] = useState("");
   const [description, setDescription] = useState("");
   const [image, setImage] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
+  const [showPreview, setShowPreview] = useState(false);
+  const [previewMode, setPreviewMode] = useState("side"); // "side" or "overlay"
   const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
@@ -32,6 +36,7 @@ const Dashboard = () => {
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     setImage(file);
+    setImagePreview(URL.createObjectURL(file));
   };
 
   const handleSend = async () => {
@@ -61,6 +66,8 @@ const Dashboard = () => {
       setSubject("");
       setDescription("");
       setImage(null);
+      setImagePreview(null);
+      setShowPreview(false);
     } catch (error) {
       console.error(
         "Error sending newsletter:",
@@ -69,61 +76,213 @@ const Dashboard = () => {
     }
   };
 
+  const togglePreviewMode = () => {
+    setPreviewMode(previewMode === "side" ? "overlay" : "side");
+  };
+
   const isFormValid =
     subject.trim() !== "" && description.trim() !== "" && image !== null;
 
   return (
-    <div className="container">
-      <div className="card">
-        <h2 className="title">Newsletter</h2>
-
-        <div className="nav-buttons">
-          <button className="nav-button" onClick={() => navigate("/dashboard")}>
-            Create Newsletters
+    <div className="dashboard-container">
+      <div className="sidebar">
+        <div className="sidebar-header">
+          <h1>Newsletter App</h1>
+        </div>
+        <div className="sidebar-menu">
+          <button
+            className={`sidebar-button ${
+              location.pathname === "/dashboard" ? "active" : ""
+            }`}
+            onClick={() => navigate("/dashboard")}
+          >
+            Create Newsletter
           </button>
           <button
-            className="nav-button"
+            className={`sidebar-button ${
+              location.pathname === "/viewSubscribers" ? "active" : ""
+            }`}
             onClick={() => navigate("/viewSubscribers")}
           >
             View Subscribers
           </button>
           <button
-            className="nav-button"
+            className={`sidebar-button ${
+              location.pathname === "/view-newsletters" ? "active" : ""
+            }`}
             onClick={() => navigate("/view-newsletters")}
           >
             View Newsletters
           </button>
         </div>
+        <div className="sidebar-footer">
+          <button onClick={handleLogout} className="logout-button">
+            Logout
+          </button>
+        </div>
+      </div>
 
-        <input
-          type="text"
-          placeholder="Subject"
-          className="input"
-          value={subject}
-          onChange={(e) => setSubject(e.target.value)}
-        />
-        <textarea
-          placeholder="Description"
-          className="textarea"
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-        ></textarea>
+      <div
+        className={`main-content ${
+          showPreview && previewMode === "side" ? "with-preview" : ""
+        }`}
+      >
+        <div className="content-card">
+          <h2 className="content-title">Create Newsletter</h2>
 
-        <div className="imageUpload">
-          <input type="file" accept="image/*" onChange={handleImageChange} />
+          <div className="form-group">
+            <label htmlFor="subject">Subject</label>
+            <input
+              id="subject"
+              type="text"
+              placeholder="Enter newsletter subject"
+              className="form-input"
+              value={subject}
+              onChange={(e) => setSubject(e.target.value)}
+            />
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="description">Description</label>
+            <textarea
+              id="description"
+              placeholder="Enter newsletter content"
+              className="form-textarea"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+            ></textarea>
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="image">Image</label>
+            <div className="image-upload">
+              <input
+                id="image"
+                type="file"
+                accept="image/*"
+                onChange={handleImageChange}
+              />
+              {imagePreview && (
+                <div className="image-preview">
+                  <img
+                    src={imagePreview}
+                    alt="Preview"
+                    className="preview-thumbnail"
+                  />
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className="action-buttons">
+            <button
+              className={`preview-button ${showPreview ? "active" : ""}`}
+              onClick={() => setShowPreview(!showPreview)}
+              disabled={!isFormValid}
+            >
+              {showPreview ? "Hide Preview" : "Show Preview"}
+            </button>
+
+            {showPreview && (
+              <button
+                className="preview-mode-button"
+                onClick={togglePreviewMode}
+              >
+                {previewMode === "side"
+                  ? "Switch to Overlay"
+                  : "Switch to Side-by-Side"}
+              </button>
+            )}
+
+            <button
+              className="send-button"
+              onClick={handleSend}
+              disabled={!isFormValid}
+            >
+              Send Newsletter
+            </button>
+          </div>
         </div>
 
-        <button
-          className="sendButton"
-          onClick={handleSend}
-          disabled={!isFormValid}
-        >
-          Send
-        </button>
+        {/* Side-by-side Preview */}
+        {showPreview && previewMode === "side" && (
+          <div className="preview-card side-preview">
+            <h2 className="preview-header">Email Preview</h2>
+            <div className="preview-content">
+              <h3 className="preview-subject">{subject}</h3>
+              <div className="preview-body">
+                <p>{description}</p>
+                {imagePreview && (
+                  <img
+                    src={imagePreview}
+                    alt="Email Preview"
+                    className="preview-image"
+                  />
+                )}
+              </div>
+            </div>
+          </div>
+        )}
 
-        <button onClick={handleLogout} className="logoutButton">
-          Logout
-        </button>
+        {/* Overlay Preview */}
+        {showPreview && previewMode === "overlay" && (
+          <div className="preview-overlay">
+            <div className="preview-modal">
+              <div className="preview-header">
+                <h2>Email Preview</h2>
+                <button
+                  onClick={() => setShowPreview(false)}
+                  className="close-preview"
+                >
+                  ×
+                </button>
+              </div>
+              <div className="preview-email-container">
+                <div className="preview-email-header">
+                  <div className="email-metadata">
+                    <p>
+                      <strong>From:</strong> Newsletter App
+                    </p>
+                    <p>
+                      <strong>To:</strong> Subscribers
+                    </p>
+                    <p>
+                      <strong>Subject:</strong> {subject}
+                    </p>
+                  </div>
+                </div>
+                <div className="preview-email-body">
+                  <h3>{subject}</h3>
+                  <div className="email-content">
+                    <p>{description}</p>
+                    {imagePreview && (
+                      <img
+                        src={imagePreview}
+                        alt="Email Preview"
+                        className="preview-image"
+                      />
+                    )}
+                  </div>
+                </div>
+              </div>
+              <div className="preview-actions">
+                <button
+                  onClick={() => setShowPreview(false)}
+                  className="cancel-button"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleSend}
+                  className="send-button"
+                  disabled={!isFormValid}
+                >
+                  Send Newsletter
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

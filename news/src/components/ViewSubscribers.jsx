@@ -1,9 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import "../styles/ViewSubscribers.css";
+import { useNavigate, useLocation } from "react-router-dom";
+import { auth } from "../firebaseConfig";
+import { signOut } from "firebase/auth";
+import "../styles/Dashboard.css";
 
 const ViewSubscribers = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [users, setUsers] = useState([]);
 
   useEffect(() => {
@@ -32,36 +35,74 @@ const ViewSubscribers = () => {
     }
   };
 
-  return (
-    <div className="container">
-      <div className="card">
-        <h2 className="title">View Subscribers</h2>
+  const handleLogout = async () => {
+    await signOut(auth);
+    navigate("/login");
+  };
 
-        <div className="nav-buttons">
-          <button className="nav-button" onClick={() => navigate("/dashboard")}>
+  return (
+    <div className="dashboard-container">
+      <div className="sidebar">
+        <div className="sidebar-header">
+          <h1>Newsletter App</h1>
+        </div>
+        <div className="sidebar-menu">
+          <button
+            className={`sidebar-button ${
+              location.pathname === "/dashboard" ? "active" : ""
+            }`}
+            onClick={() => navigate("/dashboard")}
+          >
             Create Newsletter
           </button>
-          <button className="nav-button">View Subscribers</button>
           <button
-            className="nav-button"
+            className={`sidebar-button ${
+              location.pathname === "/viewSubscribers" ? "active" : ""
+            }`}
+            onClick={() => navigate("/viewSubscribers")}
+          >
+            View Subscribers
+          </button>
+          <button
+            className={`sidebar-button ${
+              location.pathname === "/view-newsletters" ? "active" : ""
+            }`}
             onClick={() => navigate("/view-newsletters")}
           >
             View Newsletters
           </button>
         </div>
+        <div className="sidebar-footer">
+          <button onClick={handleLogout} className="logout-button">
+            Logout
+          </button>
+        </div>
+      </div>
 
-        <div className="subscriber-list">
-          {users.length === 0 ? (
-            <p>No subscribers found.</p>
-          ) : (
-            users.map((user) => (
-              <div key={user._id} className="subscriber-card">
-                <h3>{user.name}</h3>
-                <p>{user.email}</p>
-                <button onClick={() => handleDelete(user._id)}>Delete</button>
-              </div>
-            ))
-          )}
+      <div className="main-content">
+        <div className="content-card">
+          <h2 className="content-title">All Subscribers</h2>
+
+          <div className="subscriber-list">
+            {users.length === 0 ? (
+              <p className="no-data">No subscribers found.</p>
+            ) : (
+              users.map((user) => (
+                <div key={user._id} className="subscriber-item">
+                  <div className="subscriber-info">
+                    <h3>{user.name}</h3>
+                    <p>{user.email}</p>
+                  </div>
+                  <button
+                    className="delete-button"
+                    onClick={() => handleDelete(user._id)}
+                  >
+                    Delete
+                  </button>
+                </div>
+              ))
+            )}
+          </div>
         </div>
       </div>
     </div>

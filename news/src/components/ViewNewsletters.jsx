@@ -1,16 +1,21 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
-import "../styles/ViewNewsletters.css";
+import { useNavigate, useLocation } from "react-router-dom";
+import { auth } from "../firebaseConfig";
+import { signOut } from "firebase/auth";
+import "../styles/Dashboard.css";
 
 const ViewNewsletters = () => {
   const [newsletters, setNewsletters] = useState([]);
   const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
     const fetchNewsletters = async () => {
       try {
-        const response = await axios.get("http://localhost:5000/api/newsletters");
+        const response = await axios.get(
+          "http://localhost:5000/api/newsletters"
+        );
         setNewsletters(response.data);
       } catch (error) {
         console.error("Error fetching newsletters:", error);
@@ -28,42 +33,87 @@ const ViewNewsletters = () => {
         prevNewsletters.filter((newsletter) => newsletter._id !== id)
       );
     } catch (error) {
-      console.error("Error deleting newsletter:", error.response?.data || error.message);
+      console.error(
+        "Error deleting newsletter:",
+        error.response?.data || error.message
+      );
       alert("Failed to delete newsletter");
     }
   };
 
-  return (
-    <div className="container">
-      <div className="card">
-        <h2 className="title">View Newsletters</h2>
+  const handleLogout = async () => {
+    await signOut(auth);
+    navigate("/login");
+  };
 
-        <div className="nav-buttons">
-          <button className="nav-button" onClick={() => navigate("/dashboard")}>
+  return (
+    <div className="dashboard-container">
+      <div className="sidebar">
+        <div className="sidebar-header">
+          <h1>Newsletter App</h1>
+        </div>
+        <div className="sidebar-menu">
+          <button
+            className={`sidebar-button ${
+              location.pathname === "/dashboard" ? "active" : ""
+            }`}
+            onClick={() => navigate("/dashboard")}
+          >
             Create Newsletter
           </button>
-          <button className="nav-button">View Subscribers</button>
-          <button className="nav-button" onClick={() => navigate("/view-newsletters")}>
+          <button
+            className={`sidebar-button ${
+              location.pathname === "/viewSubscribers" ? "active" : ""
+            }`}
+            onClick={() => navigate("/viewSubscribers")}
+          >
+            View Subscribers
+          </button>
+          <button
+            className={`sidebar-button ${
+              location.pathname === "/view-newsletters" ? "active" : ""
+            }`}
+            onClick={() => navigate("/view-newsletters")}
+          >
             View Newsletters
           </button>
         </div>
+        <div className="sidebar-footer">
+          <button onClick={handleLogout} className="logout-button">
+            Logout
+          </button>
+        </div>
+      </div>
 
-        <div className="newsletter-list">
-          {newsletters.length > 0 ? (
-            newsletters.map((news) => (
-              <div key={news._id} className="newsletter-card">
-                <h3>{news.subject}</h3>
-                <p>{news.description}</p>
-                {news.imageUrl && (
-                  <img src={`http://localhost:5000${news.imageUrl}`} alt="Newsletter" className="newsletter-image" />
-                )}
-                <button onClick={() => handleDelete(news._id)}>Delete</button>
-               
-              </div>
-            ))
-          ) : (
-            <p>No newsletters available.</p>
-          )}
+      <div className="main-content">
+        <div className="content-card">
+          <h2 className="content-title">All Newsletters</h2>
+
+          <div className="newsletter-grid">
+            {newsletters.length > 0 ? (
+              newsletters.map((news) => (
+                <div key={news._id} className="newsletter-item">
+                  <h3>{news.subject}</h3>
+                  <p>{news.description}</p>
+                  {news.imageUrl && (
+                    <img
+                      src={news.imageUrl}
+                      alt="Newsletter"
+                      className="newsletter-image"
+                    />
+                  )}
+                  <button
+                    className="delete-button"
+                    onClick={() => handleDelete(news._id)}
+                  >
+                    Delete
+                  </button>
+                </div>
+              ))
+            ) : (
+              <p className="no-data">No newsletters available.</p>
+            )}
+          </div>
         </div>
       </div>
     </div>

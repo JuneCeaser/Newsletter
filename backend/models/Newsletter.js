@@ -1,5 +1,5 @@
-// models/Newsletter.js
 const mongoose = require("mongoose");
+const cloudinary = require("../config/cloudinary");
 
 const newsletterSchema = new mongoose.Schema(
   {
