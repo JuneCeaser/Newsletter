@@ -1,8 +1,9 @@
-/* ViewNewsletters.css */
+/* General Reset */
 * {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
+  font-family: Arial, sans-serif;
 }
 
 .container {
@@ -58,6 +59,7 @@
   background-color: #cbd5e0;
 }
 
+/* Newsletter List */
 .newsletter-list {
   display: flex;
   flex-direction: column;
@@ -69,6 +71,10 @@
   padding: 1.5rem;
   border-radius: 0.75rem;
   background-color: #f7fafc;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
 }
 
 .newsletter-card h3 {
@@ -84,13 +90,17 @@
   margin-bottom: 1rem;
 }
 
+/* Fixed Image Size */
 .newsletter-image {
-  width: 100%;
-  max-width: 100%;
-  border-radius: 0.5rem;
-  margin-top: 0.75rem;
+  width: 200px; /* Fixed width */
+  height: 150px; /* Fixed height */
+  object-fit: cover; /* Ensures the image covers the area without distortion */
+  border-radius: 0.5rem; /* Optional: Adds rounded corners */
+  display: block;
+  margin: 0 auto 1rem auto; /* Centers the image and adds margin below */
 }
 
+/* Delete Button */
 .newsletter-card button {
   background-color: #e53e3e;
   color: white;
@@ -100,12 +110,14 @@
   cursor: pointer;
   font-size: 0.875rem;
   transition: background-color 0.2s ease;
+  margin-top: 0.75rem;
 }
 
 .newsletter-card button:hover {
   background-color: #c53030;
 }
 
+/* Responsive Design */
 @media (max-width: 640px) {
   .card {
     margin: 1rem;

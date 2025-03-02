@@ -13,7 +13,7 @@ const Dashboard = () => {
   const [image, setImage] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
   const [showPreview, setShowPreview] = useState(false);
-  const [previewMode, setPreviewMode] = useState("side"); // "side" or "overlay"
+  const [previewMode, setPreviewMode] = useState("side");
   const navigate = useNavigate();
   const location = useLocation();
 

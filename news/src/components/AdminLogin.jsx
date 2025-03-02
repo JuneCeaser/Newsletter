@@ -16,7 +16,7 @@ const AdminLogin = () => {
     try {
       await signInWithEmailAndPassword(auth, email, password);
       alert("Login successful!");
-      navigate("/dashboard"); // Redirect to Admin Dashboard
+      navigate("/dashboard");
     } catch (err) {
       setError("Invalid email or password");
     }
@@ -48,7 +48,6 @@ const AdminLogin = () => {
             Login
           </button>
         </form>
-       
       </div>
     </div>
   );
