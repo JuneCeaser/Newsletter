@@ -1,68 +1,92 @@
 import React, { useEffect, useState } from "react";
-import { auth } from "../firebaseConfig";
-import { signOut, onAuthStateChanged } from "firebase/auth";
 import { useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
 import { v4 as uuidv4 } from "uuid";
 import "../styles/Dashboard.css";
 
 const Dashboard = () => {
-  const [user, setUser] = useState(null);
-  const [subject, setSubject] = useState("");
-  const [description, setDescription] = useState("");
-  const [image, setImage] = useState(null);
-  const [imagePreview, setImagePreview] = useState(null);
-  const [showPreview, setShowPreview] = useState(false);
-  const [previewMode, setPreviewMode] = useState("side");
+  // State variables for managing form inputs and user authentication
+  const [user, setUser] = useState(null); // Stores the authenticated user's data
+  const [subject, setSubject] = useState(""); // Stores the newsletter subject
+  const [description, setDescription] = useState(""); // Stores the newsletter description
+  const [image, setImage] = useState(null); // Stores the uploaded image file
+  const [imagePreview, setImagePreview] = useState(null); // Stores the preview of the uploaded image
+  const [showPreview, setShowPreview] = useState(false); // Controls the visibility of the preview section
+  const [previewMode, setPreviewMode] = useState("side"); // Toggles between 'side' and 'overlay' preview modes
+
   const navigate = useNavigate();
   const location = useLocation();
 
+  // Check if the user is authenticated
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      if (currentUser) {
-        setUser(currentUser);
-      } else {
-        navigate("/login");
+    const token = localStorage.getItem("token"); // Retrieve token from local storage
+    if (!token) {
+      navigate("/login"); // Redirect to login page if token is missing
+      return;
+    }
+
+    // Fetch user data from the backend
+    const fetchUser = async () => {
+      try {
+        const response = await axios.get("http://localhost:5000/api/auth/me", {
+          headers: {
+            Authorization: `Bearer ${token}`, // Send token for authentication
+          },
+        });
+        setUser(response.data.user); // Store user data in state
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+        localStorage.removeItem("token"); // Clear invalid token
+        navigate("/login"); // Redirect to login page
       }
-    });
-    return () => unsubscribe();
+    };
+
+    fetchUser();
   }, [navigate]);
 
-  const handleLogout = async () => {
-    await signOut(auth);
+  // Logout function: Clears token and redirects to login page
+  const handleLogout = () => {
+    localStorage.removeItem("token");
     navigate("/login");
   };
 
+  // Handles image upload and preview
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     setImage(file);
-    setImagePreview(URL.createObjectURL(file));
+    setImagePreview(URL.createObjectURL(file)); // Creates a URL for previewing the image
   };
 
+  // Handles newsletter submission
   const handleSend = async () => {
+    // Validate that all fields are filled
     if (subject.trim() === "" || description.trim() === "" || !image) {
       console.log("Form is incomplete, send disabled.");
       return;
     }
 
-    const customId = uuidv4();
-    const formData = new FormData();
+    const customId = uuidv4(); // Generate a unique ID for the newsletter
+    const formData = new FormData(); // Create FormData object for file upload
     formData.append("id", customId);
     formData.append("subject", subject);
     formData.append("description", description);
     formData.append("image", image);
 
     try {
+      const token = localStorage.getItem("token");
       const response = await axios.post(
         "http://localhost:5000/api/newsletters",
         formData,
         {
           headers: {
             "Content-Type": "multipart/form-data",
+            Authorization: `Bearer ${token}`, // Send token for authentication
           },
         }
       );
       console.log("Newsletter sent successfully:", response.data);
+
+      // Reset form fields after submission
       setSubject("");
       setDescription("");
       setImage(null);
@@ -76,15 +100,18 @@ const Dashboard = () => {
     }
   };
 
+  // Toggles between 'side' and 'overlay' preview modes
   const togglePreviewMode = () => {
     setPreviewMode(previewMode === "side" ? "overlay" : "side");
   };
 
+  // Check if form is valid for enabling buttons
   const isFormValid =
     subject.trim() !== "" && description.trim() !== "" && image !== null;
 
   return (
     <div className="dashboard-container">
+      {/* Sidebar navigation */}
       <div className="sidebar">
         <div className="sidebar-header">
           <h1>Newsletter App</h1>
@@ -122,6 +149,7 @@ const Dashboard = () => {
         </div>
       </div>
 
+      {/* Main content area */}
       <div
         className={`main-content ${
           showPreview && previewMode === "side" ? "with-preview" : ""
@@ -130,6 +158,7 @@ const Dashboard = () => {
         <div className="content-card">
           <h2 className="content-title">Create Newsletter</h2>
 
+          {/* Subject input */}
           <div className="form-group">
             <label htmlFor="subject">Subject</label>
             <input
@@ -142,6 +171,7 @@ const Dashboard = () => {
             />
           </div>
 
+          {/* Description input */}
           <div className="form-group">
             <label htmlFor="description">Description</label>
             <textarea
@@ -153,6 +183,7 @@ const Dashboard = () => {
             ></textarea>
           </div>
 
+          {/* Image upload */}
           <div className="form-group">
             <label htmlFor="image">Image</label>
             <div className="image-upload">
@@ -174,6 +205,7 @@ const Dashboard = () => {
             </div>
           </div>
 
+          {/* Action buttons */}
           <div className="action-buttons">
             <button
               className={`preview-button ${showPreview ? "active" : ""}`}
@@ -210,76 +242,8 @@ const Dashboard = () => {
             <h2 className="preview-header">Email Preview</h2>
             <div className="preview-content">
               <h3 className="preview-subject">{subject}</h3>
-              <div className="preview-body">
-                <p>{description}</p>
-                {imagePreview && (
-                  <img
-                    src={imagePreview}
-                    alt="Email Preview"
-                    className="preview-image"
-                  />
-                )}
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Overlay Preview */}
-        {showPreview && previewMode === "overlay" && (
-          <div className="preview-overlay">
-            <div className="preview-modal">
-              <div className="preview-header">
-                <h2>Email Preview</h2>
-                <button
-                  onClick={() => setShowPreview(false)}
-                  className="close-preview"
-                >
-                  ×
-                </button>
-              </div>
-              <div className="preview-email-container">
-                <div className="preview-email-header">
-                  <div className="email-metadata">
-                    <p>
-                      <strong>From:</strong> Newsletter App
-                    </p>
-                    <p>
-                      <strong>To:</strong> Subscribers
-                    </p>
-                    <p>
-                      <strong>Subject:</strong> {subject}
-                    </p>
-                  </div>
-                </div>
-                <div className="preview-email-body">
-                  <h3>{subject}</h3>
-                  <div className="email-content">
-                    <p>{description}</p>
-                    {imagePreview && (
-                      <img
-                        src={imagePreview}
-                        alt="Email Preview"
-                        className="preview-image"
-                      />
-                    )}
-                  </div>
-                </div>
-              </div>
-              <div className="preview-actions">
-                <button
-                  onClick={() => setShowPreview(false)}
-                  className="cancel-button"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={handleSend}
-                  className="send-button"
-                  disabled={!isFormValid}
-                >
-                  Send Newsletter
-                </button>
-              </div>
+              <p>{description}</p>
+              {imagePreview && <img src={imagePreview} alt="Email Preview" />}
             </div>
           </div>
         )}

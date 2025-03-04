@@ -1,7 +1,6 @@
-import { useState } from "react";
-import { signInWithEmailAndPassword } from "firebase/auth";
-import { auth } from "../firebaseConfig";
-import { useNavigate } from "react-router-dom";
+import React, { useState } from "react";
+import { useNavigate, Link } from "react-router-dom";
+import axios from "axios";
 import "../styles/AdminLogin.css";
 
 const AdminLogin = () => {
@@ -14,7 +13,11 @@ const AdminLogin = () => {
     e.preventDefault();
     setError(null);
     try {
-      await signInWithEmailAndPassword(auth, email, password);
+      const response = await axios.post(
+        "http://localhost:5000/api/auth/login",
+        { email, password }
+      );
+      localStorage.setItem("token", response.data.token);
       alert("Login successful!");
       navigate("/dashboard");
     } catch (err) {
@@ -48,6 +51,9 @@ const AdminLogin = () => {
             Login
           </button>
         </form>
+        <p className="signup-link">
+          Don't have an account? <Link to="/signup">Sign up</Link>
+        </p>
       </div>
     </div>
   );

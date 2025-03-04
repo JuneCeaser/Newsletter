@@ -1,4 +1,6 @@
 import React, { useState } from "react";
+import axios from "axios";
+import "../styles/AdminLogin.css";
 
 const AdminSignup = () => {
   const [formData, setFormData] = useState({
@@ -8,6 +10,8 @@ const AdminSignup = () => {
     confirmPassword: "",
   });
 
+  const [error, setError] = useState(null);
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({
@@ -16,15 +20,34 @@ const AdminSignup = () => {
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setError(null);
 
-    console.log("Form submitted", formData);
+    if (formData.password !== formData.confirmPassword) {
+      setError("Passwords do not match");
+      return;
+    }
+
+    try {
+      const response = await axios.post(
+        "http://localhost:5000/api/auth/register",
+        {
+          username: formData.username,
+          email: formData.email,
+          password: formData.password,
+        }
+      );
+      alert("Signup successful! Please login.");
+      console.log("Signup response:", response.data);
+    } catch (err) {
+      setError(err.response?.data?.msg || "Signup failed");
+    }
   };
-
   return (
     <div className="signup-container">
       <h2>Admin Signup</h2>
+      {error && <p className="error-message">{error}</p>}
       <form onSubmit={handleSubmit}>
         <div className="form-group">
           <label htmlFor="username">Username</label>

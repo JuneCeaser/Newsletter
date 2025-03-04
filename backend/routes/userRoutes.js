@@ -1,14 +1,9 @@
 const express = require("express");
-const {
-  getAllUsers,
-  getUserById,
-  deleteUserById,
-} = require("../controllers/userController");
+const { getAllUsers } = require("../controllers/userController");
+const authMiddleware = require("../middleware/authMiddleware");
 
 const router = express.Router();
 
-router.get("/", getAllUsers);
-router.get("/:id", getUserById);
-router.delete("/:id", deleteUserById);
+router.get("/", authMiddleware, getAllUsers);
 
 module.exports = router;
