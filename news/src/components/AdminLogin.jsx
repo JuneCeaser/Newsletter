@@ -17,7 +17,7 @@ const AdminLogin = () => {
         "http://localhost:5000/api/auth/login",
         { email, password }
       );
-      localStorage.setItem("token", response.data.token);
+      localStorage.setItem("token", response.data.token); // Ensure this line is executed
       alert("Login successful!");
       navigate("/dashboard");
     } catch (err) {

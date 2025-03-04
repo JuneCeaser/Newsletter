@@ -1,25 +1,26 @@
-const User = require("../models/User");
-const jwt = require("jsonwebtoken");
-const bcrypt = require("bcryptjs");
 const Admin = require("../models/Admin");
+const jwt = require("jsonwebtoken");
 
+// Signup without password encryption
 const register = async (req, res) => {
   const { username, email, password } = req.body;
   try {
-    let user = await User.findOne({ email });
-    if (user) {
-      return res.status(400).json({ msg: "User already exists" });
+    // Check if admin already exists
+    let admin = await Admin.findOne({ email });
+    if (admin) {
+      return res.status(400).json({ msg: "Admin already exists" });
     }
 
-    user = new Admin({ username, email, password, role: "admin" });
-    user.password = await bcrypt.hash;
-    await user.save();
+    // Create a new admin with plain text password
+    admin = new Admin({ username, email, password, role: "admin" });
+    await admin.save();
 
-    const payload = { user: { id: user.id } };
+    // Generate JWT token
+    const payload = { admin: { id: admin.id } };
     jwt.sign(
       payload,
       process.env.JWT_SECRET,
-      { expiresIn: "1h" },
+      { expiresIn: "24h" },
       (err, token) => {
         if (err) throw err;
         res.json({ token });
@@ -31,24 +32,27 @@ const register = async (req, res) => {
   }
 };
 
+// Login without password encryption
 const login = async (req, res) => {
   const { email, password } = req.body;
   try {
-    let user = await Admin.findOne({ email });
-    if (!user) {
+    // Find admin by email
+    let admin = await Admin.findOne({ email });
+    if (!admin) {
       return res.status(400).json({ msg: "Invalid Credentials" });
     }
 
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) {
+    // Compare plain text passwords
+    if (password !== admin.password) {
       return res.status(400).json({ msg: "Invalid Credentials" });
     }
 
-    const payload = { user: { id: user.id } };
+    // Generate JWT token
+    const payload = { admin: { id: admin.id } };
     jwt.sign(
       payload,
       process.env.JWT_SECRET,
-      { expiresIn: "1h" },
+      { expiresIn: "24h" },
       (err, token) => {
         if (err) throw err;
         res.json({ token });

@@ -5,68 +5,61 @@ import { v4 as uuidv4 } from "uuid";
 import "../styles/Dashboard.css";
 
 const Dashboard = () => {
-  // State variables for managing form inputs and user authentication
-  const [user, setUser] = useState(null); // Stores the authenticated user's data
-  const [subject, setSubject] = useState(""); // Stores the newsletter subject
-  const [description, setDescription] = useState(""); // Stores the newsletter description
-  const [image, setImage] = useState(null); // Stores the uploaded image file
-  const [imagePreview, setImagePreview] = useState(null); // Stores the preview of the uploaded image
-  const [showPreview, setShowPreview] = useState(false); // Controls the visibility of the preview section
-  const [previewMode, setPreviewMode] = useState("side"); // Toggles between 'side' and 'overlay' preview modes
+  const [user, setUser] = useState(null);
+  const [subject, setSubject] = useState("");
+  const [description, setDescription] = useState("");
+  const [image, setImage] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
+  const [showPreview, setShowPreview] = useState(false);
+  const [previewMode, setPreviewMode] = useState("side");
 
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Check if the user is authenticated
   useEffect(() => {
-    const token = localStorage.getItem("token"); // Retrieve token from local storage
+    const token = localStorage.getItem("token");
     if (!token) {
-      navigate("/login"); // Redirect to login page if token is missing
+      navigate("/login");
       return;
     }
 
-    // Fetch user data from the backend
     const fetchUser = async () => {
       try {
         const response = await axios.get("http://localhost:5000/api/auth/me", {
           headers: {
-            Authorization: `Bearer ${token}`, // Send token for authentication
+            Authorization: `Bearer ${token}`,
           },
         });
-        setUser(response.data.user); // Store user data in state
+        setUser(response.data.user);
       } catch (error) {
         console.error("Error fetching user data:", error);
-        localStorage.removeItem("token"); // Clear invalid token
-        navigate("/login"); // Redirect to login page
+        localStorage.removeItem("token");
+        navigate("/login");
       }
     };
 
     fetchUser();
   }, [navigate]);
 
-  // Logout function: Clears token and redirects to login page
   const handleLogout = () => {
     localStorage.removeItem("token");
     navigate("/login");
   };
 
-  // Handles image upload and preview
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     setImage(file);
-    setImagePreview(URL.createObjectURL(file)); // Creates a URL for previewing the image
+    setImagePreview(URL.createObjectURL(file));
   };
 
-  // Handles newsletter submission
   const handleSend = async () => {
-    // Validate that all fields are filled
     if (subject.trim() === "" || description.trim() === "" || !image) {
       console.log("Form is incomplete, send disabled.");
       return;
     }
 
-    const customId = uuidv4(); // Generate a unique ID for the newsletter
-    const formData = new FormData(); // Create FormData object for file upload
+    const customId = uuidv4();
+    const formData = new FormData();
     formData.append("id", customId);
     formData.append("subject", subject);
     formData.append("description", description);
@@ -80,13 +73,12 @@ const Dashboard = () => {
         {
           headers: {
             "Content-Type": "multipart/form-data",
-            Authorization: `Bearer ${token}`, // Send token for authentication
+            Authorization: `Bearer ${token}`,
           },
         }
       );
       console.log("Newsletter sent successfully:", response.data);
 
-      // Reset form fields after submission
       setSubject("");
       setDescription("");
       setImage(null);
@@ -100,18 +92,15 @@ const Dashboard = () => {
     }
   };
 
-  // Toggles between 'side' and 'overlay' preview modes
   const togglePreviewMode = () => {
     setPreviewMode(previewMode === "side" ? "overlay" : "side");
   };
 
-  // Check if form is valid for enabling buttons
   const isFormValid =
     subject.trim() !== "" && description.trim() !== "" && image !== null;
 
   return (
     <div className="dashboard-container">
-      {/* Sidebar navigation */}
       <div className="sidebar">
         <div className="sidebar-header">
           <h1>Newsletter App</h1>
@@ -149,7 +138,6 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {/* Main content area */}
       <div
         className={`main-content ${
           showPreview && previewMode === "side" ? "with-preview" : ""
@@ -158,7 +146,6 @@ const Dashboard = () => {
         <div className="content-card">
           <h2 className="content-title">Create Newsletter</h2>
 
-          {/* Subject input */}
           <div className="form-group">
             <label htmlFor="subject">Subject</label>
             <input
@@ -171,7 +158,6 @@ const Dashboard = () => {
             />
           </div>
 
-          {/* Description input */}
           <div className="form-group">
             <label htmlFor="description">Description</label>
             <textarea
@@ -183,7 +169,6 @@ const Dashboard = () => {
             ></textarea>
           </div>
 
-          {/* Image upload */}
           <div className="form-group">
             <label htmlFor="image">Image</label>
             <div className="image-upload">
@@ -205,7 +190,6 @@ const Dashboard = () => {
             </div>
           </div>
 
-          {/* Action buttons */}
           <div className="action-buttons">
             <button
               className={`preview-button ${showPreview ? "active" : ""}`}
@@ -236,7 +220,6 @@ const Dashboard = () => {
           </div>
         </div>
 
-        {/* Side-by-side Preview */}
         {showPreview && previewMode === "side" && (
           <div className="preview-card side-preview">
             <h2 className="preview-header">Email Preview</h2>

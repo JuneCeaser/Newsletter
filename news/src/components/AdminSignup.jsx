@@ -44,6 +44,7 @@ const AdminSignup = () => {
       setError(err.response?.data?.msg || "Signup failed");
     }
   };
+
   return (
     <div className="signup-container">
       <h2>Admin Signup</h2>

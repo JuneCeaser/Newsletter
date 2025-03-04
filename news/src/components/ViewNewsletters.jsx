@@ -1,8 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate, useLocation } from "react-router-dom";
-import { auth } from "../firebaseConfig";
-import { signOut } from "firebase/auth";
 import "../styles/Dashboard.css";
 
 const ViewNewsletters = () => {
@@ -41,8 +39,8 @@ const ViewNewsletters = () => {
     }
   };
 
-  const handleLogout = async () => {
-    await signOut(auth);
+  const handleLogout = () => {
+    localStorage.removeItem("token");
     navigate("/login");
   };
 

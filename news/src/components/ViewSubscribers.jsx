@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { auth } from "../firebaseConfig";
-import { signOut } from "firebase/auth";
+import axios from "axios";
 import "../styles/Dashboard.css";
 
 const ViewSubscribers = () => {
@@ -12,9 +11,8 @@ const ViewSubscribers = () => {
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const response = await fetch("http://localhost:5000/api/users");
-        const data = await response.json();
-        setUsers(data);
+        const response = await axios.get("http://localhost:5000/api/users");
+        setUsers(response.data);
       } catch (error) {
         console.error("Error fetching users:", error);
       }
@@ -25,18 +23,15 @@ const ViewSubscribers = () => {
 
   const handleDelete = async (id) => {
     try {
-      await fetch(`http://localhost:5000/api/users/${id}`, {
-        method: "DELETE",
-      });
-
+      await axios.delete(`http://localhost:5000/api/users/${id}`);
       setUsers(users.filter((user) => user._id !== id));
     } catch (error) {
       console.error("Error deleting user:", error);
     }
   };
 
-  const handleLogout = async () => {
-    await signOut(auth);
+  const handleLogout = () => {
+    localStorage.removeItem("token");
     navigate("/login");
   };
 
@@ -90,7 +85,7 @@ const ViewSubscribers = () => {
               users.map((user) => (
                 <div key={user._id} className="subscriber-item">
                   <div className="subscriber-info">
-                    <h3>{user.name}</h3>
+                    <h3>{user.username}</h3>
                     <p>{user.email}</p>
                   </div>
                   <button
