@@ -1,7 +1,7 @@
 const Admin = require("../models/Admin");
 const jwt = require("jsonwebtoken");
 
-// Signup without password encryption
+// Register admin without password encryption
 const register = async (req, res) => {
   const { username, email, password } = req.body;
   try {
@@ -15,24 +15,14 @@ const register = async (req, res) => {
     admin = new Admin({ username, email, password, role: "admin" });
     await admin.save();
 
-    // Generate JWT token
-    const payload = { admin: { id: admin.id } };
-    jwt.sign(
-      payload,
-      process.env.JWT_SECRET,
-      { expiresIn: "24h" },
-      (err, token) => {
-        if (err) throw err;
-        res.json({ token });
-      }
-    );
+    res.status(201).json({ msg: "Admin registered successfully" });
   } catch (err) {
     console.error(err.message);
     res.status(500).send("Server error");
   }
 };
 
-// Login without password encryption
+// Login with JWT token generation
 const login = async (req, res) => {
   const { email, password } = req.body;
   try {

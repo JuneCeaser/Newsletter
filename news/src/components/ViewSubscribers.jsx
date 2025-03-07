@@ -7,26 +7,45 @@ const ViewSubscribers = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [users, setUsers] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      navigate("/login");
+      return;
+    }
+
     const fetchUsers = async () => {
       try {
+        setIsLoading(true);
         const response = await axios.get("http://localhost:5000/api/users");
         setUsers(response.data);
+        setError(null);
       } catch (error) {
         console.error("Error fetching users:", error);
+        setError("Failed to load subscribers. Please try again later.");
+      } finally {
+        setIsLoading(false);
       }
     };
 
     fetchUsers();
-  }, []);
+  }, [navigate]);
 
   const handleDelete = async (id) => {
+    if (!window.confirm("Are you sure you want to delete this subscriber?")) {
+      return;
+    }
+
     try {
       await axios.delete(`http://localhost:5000/api/users/${id}`);
+      alert("Subscriber deleted successfully!");
       setUsers(users.filter((user) => user._id !== id));
     } catch (error) {
       console.error("Error deleting user:", error);
+      alert("Failed to delete subscriber");
     }
   };
 
@@ -78,26 +97,32 @@ const ViewSubscribers = () => {
         <div className="content-card">
           <h2 className="content-title">All Subscribers</h2>
 
-          <div className="subscriber-list">
-            {users.length === 0 ? (
-              <p className="no-data">No subscribers found.</p>
-            ) : (
-              users.map((user) => (
-                <div key={user._id} className="subscriber-item">
-                  <div className="subscriber-info">
-                    <h3>{user.username}</h3>
-                    <p>{user.email}</p>
+          {isLoading ? (
+            <div className="loading">Loading subscribers...</div>
+          ) : error ? (
+            <div className="error-message">{error}</div>
+          ) : (
+            <div className="subscriber-list">
+              {users.length === 0 ? (
+                <p className="no-data">No subscribers found.</p>
+              ) : (
+                users.map((user) => (
+                  <div key={user._id} className="subscriber-item">
+                    <div className="subscriber-info">
+                      <h3>{user.username}</h3>
+                      <p>{user.email}</p>
+                    </div>
+                    <button
+                      className="delete-button"
+                      onClick={() => handleDelete(user._id)}
+                    >
+                      Delete
+                    </button>
                   </div>
-                  <button
-                    className="delete-button"
-                    onClick={() => handleDelete(user._id)}
-                  >
-                    Delete
-                  </button>
-                </div>
-              ))
-            )}
-          </div>
+                ))
+              )}
+            </div>
+          )}
         </div>
       </div>
     </div>

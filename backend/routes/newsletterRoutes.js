@@ -5,15 +5,34 @@ const {
   deleteNewsletter,
 } = require("../controllers/newsletterController");
 const multer = require("multer");
-const authMiddleware = require("../middleware/authMiddleware");
-
 const router = express.Router();
 
-const storage = multer.diskStorage({});
-const upload = multer({ storage });
+// Configure multer for temporary storage
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, "./uploads/");
+  },
+  filename: function (req, file, cb) {
+    cb(null, new Date().toISOString().replace(/:/g, "-") + file.originalname);
+  },
+});
 
-router.post("/", authMiddleware, upload.single("image"), createNewsletter);
-router.get("/", authMiddleware, getNewsletters);
-router.delete("/:id", authMiddleware, deleteNewsletter);
+const upload = multer({
+  storage: storage,
+  limits: {
+    fileSize: 1024 * 1024 * 5, // Limit file size to 5MB
+  },
+});
+
+// Create uploads directory if it doesn't exist
+const fs = require("fs");
+if (!fs.existsSync("./uploads")) {
+  fs.mkdirSync("./uploads");
+}
+
+// Routes without JWT authentication
+router.post("/", upload.single("image"), createNewsletter);
+router.get("/", getNewsletters);
+router.delete("/:id", deleteNewsletter);
 
 module.exports = router;

@@ -1,9 +1,9 @@
 const express = require("express");
-const { getAllUsers } = require("../controllers/userController");
-const authMiddleware = require("../middleware/authMiddleware");
-
+const { getAllUsers, deleteUser } = require("../controllers/userController");
 const router = express.Router();
 
-router.get("/", authMiddleware, getAllUsers);
+// Routes without JWT authentication
+router.get("/", getAllUsers);
+router.delete("/:id", deleteUser);
 
 module.exports = router;

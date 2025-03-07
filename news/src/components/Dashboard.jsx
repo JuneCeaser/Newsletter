@@ -12,6 +12,7 @@ const Dashboard = () => {
   const [imagePreview, setImagePreview] = useState(null);
   const [showPreview, setShowPreview] = useState(false);
   const [previewMode, setPreviewMode] = useState("side");
+  const [isLoading, setIsLoading] = useState(false);
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -22,10 +23,6 @@ const Dashboard = () => {
       navigate("/login");
       return;
     }
-
-    const fetchUser = async () => {};
-
-    fetchUser();
   }, [navigate]);
 
   const handleLogout = () => {
@@ -35,8 +32,10 @@ const Dashboard = () => {
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
-    setImage(file);
-    setImagePreview(URL.createObjectURL(file));
+    if (file) {
+      setImage(file);
+      setImagePreview(URL.createObjectURL(file));
+    }
   };
 
   const handleSend = async () => {
@@ -45,6 +44,7 @@ const Dashboard = () => {
       return;
     }
 
+    setIsLoading(true);
     const customId = uuidv4();
     const formData = new FormData();
     formData.append("id", customId);
@@ -53,14 +53,12 @@ const Dashboard = () => {
     formData.append("image", image);
 
     try {
-      const token = localStorage.getItem("token");
       const response = await axios.post(
         "http://localhost:5000/api/newsletters",
         formData,
         {
           headers: {
             "Content-Type": "multipart/form-data",
-            Authorization: `Bearer ${token}`,
           },
         }
       );
@@ -71,11 +69,18 @@ const Dashboard = () => {
       setImage(null);
       setImagePreview(null);
       setShowPreview(false);
+      alert("Newsletter created successfully!");
     } catch (error) {
       console.error(
         "Error sending newsletter:",
         error.response?.data || error.message
       );
+      alert(
+        "Failed to create newsletter: " +
+          (error.response?.data?.message || error.message)
+      );
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -200,9 +205,9 @@ const Dashboard = () => {
             <button
               className="send-button"
               onClick={handleSend}
-              disabled={!isFormValid}
+              disabled={!isFormValid || isLoading}
             >
-              Send Newsletter
+              {isLoading ? "Sending..." : "Send Newsletter"}
             </button>
           </div>
         </div>
