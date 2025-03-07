@@ -23,20 +23,7 @@ const Dashboard = () => {
       return;
     }
 
-    const fetchUser = async () => {
-      try {
-        const response = await axios.get("http://localhost:5000/api/auth/me", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-        setUser(response.data.user);
-      } catch (error) {
-        console.error("Error fetching user data:", error);
-        localStorage.removeItem("token");
-        navigate("/login");
-      }
-    };
+    const fetchUser = async () => {};
 
     fetchUser();
   }, [navigate]);
