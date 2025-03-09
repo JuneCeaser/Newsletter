@@ -91,17 +91,23 @@ const ViewNewsletters = () => {
             {newsletters.length > 0 ? (
               newsletters.map((news) => (
                 <div key={news._id} className="newsletter-item">
-                  <h3>{news.subject}</h3>
-                  <p>{news.description}</p>
-                  {news.imageUrl && (
-                    <img
-                      src={news.imageUrl}
-                      alt="Newsletter"
-                      className="newsletter-image"
-                    />
-                  )}
+                  <h3 className="newsletter-title">{news.subject}</h3>
+                  <div className="newsletter-image-container">
+                    {news.imageUrl ? (
+                      <img
+                        src={news.imageUrl}
+                        alt="Newsletter"
+                        className="newsletter-image"
+                      />
+                    ) : (
+                      <div className="newsletter-image-placeholder">
+                        No Image
+                      </div>
+                    )}
+                  </div>
+                  <p className="newsletter-description">{news.description}</p>
                   <p className="newsletter-date">
-                    Created at: {new Date(news.createdAt).toLocaleString()}
+                    Created: {new Date(news.createdAt).toLocaleString()}
                   </p>
                   <button
                     className="delete-button"
