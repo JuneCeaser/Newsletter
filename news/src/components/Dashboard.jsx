@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
 import "../styles/Dashboard.css";
@@ -10,17 +10,52 @@ const Dashboard = () => {
   const [imagePreview, setImagePreview] = useState(null);
   const [showPreview, setShowPreview] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [dragActive, setDragActive] = useState(false);
 
+  const fileInputRef = useRef(null);
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Handle image upload
+  // Handle image upload through file input
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      setImage(file);
-      setImagePreview(URL.createObjectURL(file));
+      processFile(file);
     }
+  };
+
+  // Process the uploaded file
+  const processFile = (file) => {
+    setImage(file);
+    setImagePreview(URL.createObjectURL(file));
+  };
+
+  // Handle drag events
+  const handleDrag = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (e.type === "dragenter" || e.type === "dragover") {
+      setDragActive(true);
+    } else if (e.type === "dragleave") {
+      setDragActive(false);
+    }
+  };
+
+  // Handle drop event
+  const handleDrop = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragActive(false);
+
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      processFile(e.dataTransfer.files[0]);
+    }
+  };
+
+  // Handle button click to trigger file input
+  const handleButtonClick = () => {
+    fileInputRef.current.click();
   };
 
   // Handle sending the newsletter
@@ -153,34 +188,42 @@ const Dashboard = () => {
 
           <div className="form-group">
             <label htmlFor="image">Image</label>
-            <div className="image-upload">
+            <div
+              className={`drag-drop-area ${dragActive ? "drag-active" : ""}`}
+              onDragEnter={handleDrag}
+              onDragLeave={handleDrag}
+              onDragOver={handleDrag}
+              onDrop={handleDrop}
+              onClick={handleButtonClick}
+            >
               <input
+                ref={fileInputRef}
                 id="image"
                 type="file"
                 accept="image/*"
                 onChange={handleImageChange}
+                style={{ display: "none" }}
               />
-              {imagePreview && (
-                <div className="image-preview">
+
+              {imagePreview ? (
+                <div className="image-preview-container">
                   <img
                     src={imagePreview}
                     alt="Preview"
                     className="preview-thumbnail"
                   />
+                  <div className="image-name">{image.name}</div>
+                </div>
+              ) : (
+                <div className="drop-message">
+                  <i className="upload-icon">📁</i>
+                  <p>Drag and drop an image here or click to select</p>
                 </div>
               )}
             </div>
           </div>
 
           <div className="action-buttons">
-            <button
-              className={`preview-button ${showPreview ? "active" : ""}`}
-              onClick={() => setShowPreview(!showPreview)}
-              disabled={!isFormValid}
-            >
-              {showPreview ? "Hide Preview" : "Show Preview"}
-            </button>
-
             <button
               className="send-button"
               onClick={handleSend}
