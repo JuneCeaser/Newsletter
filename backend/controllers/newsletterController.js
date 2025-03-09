@@ -1,8 +1,6 @@
 const Newsletter = require("../models/Newsletter");
 const User = require("../models/User");
 const sendEmail = require("../config/nodemailer");
-const path = require("path");
-const fs = require("fs");
 const cloudinary = require("cloudinary").v2;
 
 // Configure Cloudinary
@@ -11,6 +9,8 @@ cloudinary.config({
   api_key: process.env.CLOUDINARY_API_KEY,
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
+
+// Create a newsletter
 const createNewsletter = async (req, res) => {
   try {
     const { subject, description } = req.body;
@@ -24,7 +24,7 @@ const createNewsletter = async (req, res) => {
       imageUrl = result.secure_url;
     }
 
-    // Create a new newsletter (MongoDB will auto-generate the _id)
+    // Create a new newsletter
     const newNewsletter = new Newsletter({
       subject,
       description,
@@ -69,15 +69,37 @@ const createNewsletter = async (req, res) => {
     });
   }
 };
-// Get all newsletters
+
+// Get all newsletters with pagination
 const getNewsletters = async (req, res) => {
   try {
-    const newsletters = await Newsletter.find().sort({ createdAt: -1 });
-    res.status(200).json(newsletters);
+    const page = parseInt(req.query.page) || 1; // Default to page 1
+    const limit = parseInt(req.query.limit) || 10; // Default to 10 newsletters per page
+    const skip = (page - 1) * limit;
+
+    // Fetch newsletters with pagination
+    const newsletters = await Newsletter.find()
+      .skip(skip)
+      .limit(limit)
+      .sort({ createdAt: -1 }); // Sort by latest first
+
+    // Get total count of newsletters
+    const totalCount = await Newsletter.countDocuments();
+
+    // Calculate total pages
+    const totalPages = Math.ceil(totalCount / limit);
+
+    res.status(200).json({
+      newsletters,
+      totalPages,
+      currentPage: page,
+    });
   } catch (error) {
-    res
-      .status(500)
-      .json({ message: "Error fetching newsletters", error: error.message });
+    console.error("Error fetching newsletters:", error);
+    res.status(500).json({
+      message: "Error fetching newsletters",
+      error: error.message,
+    });
   }
 };
 
@@ -99,9 +121,11 @@ const deleteNewsletter = async (req, res) => {
     await Newsletter.findByIdAndDelete(req.params.id);
     res.status(200).json({ message: "Newsletter deleted successfully" });
   } catch (error) {
-    res
-      .status(500)
-      .json({ message: "Error deleting newsletter", error: error.message });
+    console.error("Error deleting newsletter:", error);
+    res.status(500).json({
+      message: "Error deleting newsletter",
+      error: error.message,
+    });
   }
 };
 

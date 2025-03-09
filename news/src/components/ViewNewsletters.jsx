@@ -5,6 +5,8 @@ import "../styles/Dashboard.css";
 
 const ViewNewsletters = () => {
   const [newsletters, setNewsletters] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -12,16 +14,17 @@ const ViewNewsletters = () => {
     const fetchNewsletters = async () => {
       try {
         const response = await axios.get(
-          "http://localhost:5000/api/newsletters"
+          `http://localhost:5000/api/newsletters?page=${currentPage}&limit=10`
         );
-        setNewsletters(response.data);
+        setNewsletters(response.data.newsletters);
+        setTotalPages(response.data.totalPages);
       } catch (error) {
         console.error("Error fetching newsletters:", error);
       }
     };
 
     fetchNewsletters();
-  }, []);
+  }, [currentPage]);
 
   const handleDelete = async (id) => {
     try {
@@ -31,10 +34,7 @@ const ViewNewsletters = () => {
         prevNewsletters.filter((newsletter) => newsletter._id !== id)
       );
     } catch (error) {
-      console.error(
-        "Error deleting newsletter:",
-        error.response?.data || error.message
-      );
+      console.error("Error deleting newsletter:", error);
       alert("Failed to delete newsletter");
     }
   };
@@ -42,6 +42,10 @@ const ViewNewsletters = () => {
   const handleLogout = () => {
     localStorage.removeItem("token");
     navigate("/login");
+  };
+
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
   };
 
   return (
@@ -120,6 +124,25 @@ const ViewNewsletters = () => {
             ) : (
               <p className="no-data">No newsletters available.</p>
             )}
+          </div>
+
+          {/* Pagination Controls */}
+          <div className="pagination">
+            <button
+              onClick={() => handlePageChange(currentPage - 1)}
+              disabled={currentPage === 1}
+            >
+              Previous
+            </button>
+            <span>
+              Page {currentPage} of {totalPages}
+            </span>
+            <button
+              onClick={() => handlePageChange(currentPage + 1)}
+              disabled={currentPage === totalPages}
+            >
+              Next
+            </button>
           </div>
         </div>
       </div>
