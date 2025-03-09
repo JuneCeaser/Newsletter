@@ -5,42 +5,25 @@ import "../styles/Dashboard.css";
 
 const ViewNewsletters = () => {
   const [newsletters, setNewsletters] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState(null);
   const navigate = useNavigate();
   const location = useLocation();
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (!token) {
-      navigate("/login");
-      return;
-    }
-
     const fetchNewsletters = async () => {
       try {
-        setIsLoading(true);
         const response = await axios.get(
           "http://localhost:5000/api/newsletters"
         );
         setNewsletters(response.data);
-        setError(null);
       } catch (error) {
         console.error("Error fetching newsletters:", error);
-        setError("Failed to load newsletters. Please try again later.");
-      } finally {
-        setIsLoading(false);
       }
     };
 
     fetchNewsletters();
-  }, [navigate]);
+  }, []);
 
   const handleDelete = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this newsletter?")) {
-      return;
-    }
-
     try {
       await axios.delete(`http://localhost:5000/api/newsletters/${id}`);
       alert("Newsletter deleted successfully!");
@@ -59,11 +42,6 @@ const ViewNewsletters = () => {
   const handleLogout = () => {
     localStorage.removeItem("token");
     navigate("/login");
-  };
-
-  const formatDate = (dateString) => {
-    const options = { year: "numeric", month: "short", day: "numeric" };
-    return new Date(dateString).toLocaleDateString(undefined, options);
   };
 
   return (
@@ -107,46 +85,36 @@ const ViewNewsletters = () => {
 
       <div className="main-content">
         <div className="content-card">
-          <h2 className="content-title">All Newsletters</h2>
+          <h2 className="content-title">Latest Newsletters</h2>
 
-          {isLoading ? (
-            <div className="loading">Loading newsletters...</div>
-          ) : error ? (
-            <div className="error-message">{error}</div>
-          ) : (
-            <div className="newsletter-grid">
-              {newsletters.length > 0 ? (
-                newsletters.map((news) => (
-                  <div key={news._id} className="newsletter-item">
-                    <div className="newsletter-header">
-                      <h3>{news.subject}</h3>
-                      <span className="newsletter-date">
-                        {formatDate(news.createdAt)}
-                      </span>
-                    </div>
-                    <p className="newsletter-description">{news.description}</p>
-                    {news.imageUrl && (
-                      <div className="newsletter-image-container">
-                        <img
-                          src={news.imageUrl}
-                          alt="Newsletter"
-                          className="newsletter-image"
-                        />
-                      </div>
-                    )}
-                    <button
-                      className="delete-button"
-                      onClick={() => handleDelete(news._id)}
-                    >
-                      Delete
-                    </button>
-                  </div>
-                ))
-              ) : (
-                <p className="no-data">No newsletters available.</p>
-              )}
-            </div>
-          )}
+          <div className="newsletter-grid">
+            {newsletters.length > 0 ? (
+              newsletters.map((news) => (
+                <div key={news._id} className="newsletter-item">
+                  <h3>{news.subject}</h3>
+                  <p>{news.description}</p>
+                  {news.imageUrl && (
+                    <img
+                      src={news.imageUrl}
+                      alt="Newsletter"
+                      className="newsletter-image"
+                    />
+                  )}
+                  <p className="newsletter-date">
+                    Created at: {new Date(news.createdAt).toLocaleString()}
+                  </p>
+                  <button
+                    className="delete-button"
+                    onClick={() => handleDelete(news._id)}
+                  >
+                    Delete
+                  </button>
+                </div>
+              ))
+            ) : (
+              <p className="no-data">No newsletters available.</p>
+            )}
+          </div>
         </div>
       </div>
     </div>
