@@ -1,35 +1,20 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
-import { v4 as uuidv4 } from "uuid";
 import "../styles/Dashboard.css";
 
 const Dashboard = () => {
-  const [user, setUser] = useState(null);
   const [subject, setSubject] = useState("");
   const [description, setDescription] = useState("");
   const [image, setImage] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
   const [showPreview, setShowPreview] = useState(false);
-  const [previewMode, setPreviewMode] = useState("side");
   const [isLoading, setIsLoading] = useState(false);
 
   const navigate = useNavigate();
   const location = useLocation();
 
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (!token) {
-      navigate("/login");
-      return;
-    }
-  }, [navigate]);
-
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    navigate("/login");
-  };
-
+  // Handle image upload
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -38,21 +23,23 @@ const Dashboard = () => {
     }
   };
 
+  // Handle sending the newsletter
   const handleSend = async () => {
     if (subject.trim() === "" || description.trim() === "" || !image) {
-      console.log("Form is incomplete, send disabled.");
+      alert("Please fill in all fields and upload an image.");
       return;
     }
 
     setIsLoading(true);
-    const customId = uuidv4();
+
+    // Create FormData for the newsletter
     const formData = new FormData();
-    formData.append("id", customId);
     formData.append("subject", subject);
     formData.append("description", description);
     formData.append("image", image);
 
     try {
+      // Send the newsletter to the backend
       const response = await axios.post(
         "http://localhost:5000/api/newsletters",
         formData,
@@ -62,14 +49,18 @@ const Dashboard = () => {
           },
         }
       );
+
       console.log("Newsletter sent successfully:", response.data);
 
+      // Reset form fields
       setSubject("");
       setDescription("");
       setImage(null);
       setImagePreview(null);
       setShowPreview(false);
-      alert("Newsletter created successfully!");
+
+      // Show success message
+      alert("Newsletter created and sent successfully!");
     } catch (error) {
       console.error(
         "Error sending newsletter:",
@@ -84,10 +75,7 @@ const Dashboard = () => {
     }
   };
 
-  const togglePreviewMode = () => {
-    setPreviewMode(previewMode === "side" ? "overlay" : "side");
-  };
-
+  // Check if the form is valid
   const isFormValid =
     subject.trim() !== "" && description.trim() !== "" && image !== null;
 
@@ -124,17 +112,19 @@ const Dashboard = () => {
           </button>
         </div>
         <div className="sidebar-footer">
-          <button onClick={handleLogout} className="logout-button">
+          <button
+            onClick={() => {
+              localStorage.removeItem("token");
+              navigate("/login");
+            }}
+            className="logout-button"
+          >
             Logout
           </button>
         </div>
       </div>
 
-      <div
-        className={`main-content ${
-          showPreview && previewMode === "side" ? "with-preview" : ""
-        }`}
-      >
+      <div className="main-content">
         <div className="content-card">
           <h2 className="content-title">Create Newsletter</h2>
 
@@ -191,17 +181,6 @@ const Dashboard = () => {
               {showPreview ? "Hide Preview" : "Show Preview"}
             </button>
 
-            {showPreview && (
-              <button
-                className="preview-mode-button"
-                onClick={togglePreviewMode}
-              >
-                {previewMode === "side"
-                  ? "Switch to Overlay"
-                  : "Switch to Side-by-Side"}
-              </button>
-            )}
-
             <button
               className="send-button"
               onClick={handleSend}
@@ -212,8 +191,8 @@ const Dashboard = () => {
           </div>
         </div>
 
-        {showPreview && previewMode === "side" && (
-          <div className="preview-card side-preview">
+        {showPreview && (
+          <div className="preview-card">
             <h2 className="preview-header">Email Preview</h2>
             <div className="preview-content">
               <h3 className="preview-subject">{subject}</h3>
