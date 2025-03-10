@@ -27,6 +27,9 @@ const ViewNewsletters = () => {
   }, [currentPage]);
 
   const handleDelete = async (id) => {
+    if (!window.confirm("Are you sure you want to delete this newsletter?")) {
+      return;
+    }
     try {
       await axios.delete(`http://localhost:5000/api/newsletters/${id}`);
       alert("Newsletter deleted successfully!");

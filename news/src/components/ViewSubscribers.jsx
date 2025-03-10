@@ -113,7 +113,7 @@ const ViewSubscribers = () => {
                       <p>{user.email}</p>
                     </div>
                     <button
-                      className="delete-button"
+                      className="delete-button-subs"
                       onClick={() => handleDelete(user._id)}
                     >
                       Delete
