@@ -16,7 +16,6 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Handle image upload through file input
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -24,13 +23,11 @@ const Dashboard = () => {
     }
   };
 
-  // Process the uploaded file
   const processFile = (file) => {
     setImage(file);
     setImagePreview(URL.createObjectURL(file));
   };
 
-  // Handle drag events
   const handleDrag = (e) => {
     e.preventDefault();
     e.stopPropagation();
@@ -42,7 +39,6 @@ const Dashboard = () => {
     }
   };
 
-  // Handle drop event
   const handleDrop = (e) => {
     e.preventDefault();
     e.stopPropagation();
@@ -53,12 +49,10 @@ const Dashboard = () => {
     }
   };
 
-  // Handle button click to trigger file input
   const handleButtonClick = () => {
     fileInputRef.current.click();
   };
 
-  // Handle sending the newsletter
   const handleSend = async () => {
     if (subject.trim() === "" || description.trim() === "" || !image) {
       alert("Please fill in all fields and upload an image.");
@@ -67,14 +61,12 @@ const Dashboard = () => {
 
     setIsLoading(true);
 
-    // Create FormData for the newsletter
     const formData = new FormData();
     formData.append("subject", subject);
     formData.append("description", description);
     formData.append("image", image);
 
     try {
-      // Send the newsletter to the backend
       const response = await axios.post(
         "http://localhost:5000/api/newsletters",
         formData,
@@ -87,14 +79,12 @@ const Dashboard = () => {
 
       console.log("Newsletter sent successfully:", response.data);
 
-      // Reset form fields
       setSubject("");
       setDescription("");
       setImage(null);
       setImagePreview(null);
       setShowPreview(false);
 
-      // Show success message
       alert("Newsletter created and sent successfully!");
     } catch (error) {
       console.error(
@@ -110,7 +100,6 @@ const Dashboard = () => {
     }
   };
 
-  // Check if the form is valid
   const isFormValid =
     subject.trim() !== "" && description.trim() !== "" && image !== null;
 

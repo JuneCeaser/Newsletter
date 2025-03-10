@@ -129,7 +129,6 @@ const ViewNewsletters = () => {
             )}
           </div>
 
-          {/* Pagination Controls */}
           <div className="pagination">
             <button
               onClick={() => handlePageChange(currentPage - 1)}
