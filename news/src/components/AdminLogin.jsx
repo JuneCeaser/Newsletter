@@ -35,16 +35,16 @@ const AdminLogin = ({ setIsAuthenticated }) => {
   return (
     <div className="login-container">
       <div className="login-box">
-        <h2 className="login-title">Admin Login</h2>
+        <h2 className="login-title">Sign in to your account</h2>
         {error && <p className="error-message">{error}</p>}
 
         <form onSubmit={handleLogin}>
           <div className="form-group">
-            <label htmlFor="email">Email</label>
+            <label htmlFor="email">Email address</label>
             <input
               id="email"
               type="email"
-              placeholder="Enter your email"
+              placeholder="you@example.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="input-field"
@@ -57,7 +57,7 @@ const AdminLogin = ({ setIsAuthenticated }) => {
             <input
               id="password"
               type="password"
-              placeholder="Enter your password"
+              placeholder="••••••••"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               className="input-field"
@@ -65,14 +65,19 @@ const AdminLogin = ({ setIsAuthenticated }) => {
             />
           </div>
 
+          <div className="form-options">
+            <label className="remember-me">
+              <input type="checkbox" /> Remember me
+            </label>
+            <Link to="/forgot-password" className="forgot-password">
+              Forgot your password?
+            </Link>
+          </div>
+
           <button type="submit" className="login-button" disabled={loading}>
-            {loading ? "Logging in..." : "Login"}
+            {loading ? "Logging in..." : "Sign in"}
           </button>
         </form>
-
-        <p className="signup-link">
-          Don't have an account? <Link to="/signup">Sign up</Link>
-        </p>
       </div>
     </div>
   );
